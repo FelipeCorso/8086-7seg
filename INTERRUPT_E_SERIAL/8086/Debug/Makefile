@@ -7,7 +7,7 @@ PROJECT =
 MCU = 8086
 COMPILER = "MASM32"
 TARGET = Debug
-SHELL = C:\Windows\system32\cmd.exe
+SHELL = C:\WINDOWS\system32\cmd.exe
 
 ## Tools general options
 ASMFLAGS=/c /Zd /Zi
@@ -16,9 +16,9 @@ LDFLAGS=/CODEVIEW
 ## Processing Tools
 ASM=ml.exe
 LD=link16.exe
-#  C:/Users/fcorso/Desktop/INTERRUPT_E_SERIAL/8086/Debug/Debug.exe: TOOL=LD
-#     C:/Users/fcorso/Desktop/INTERRUPT_E_SERIAL/8086/Debug/main.obj: TOOL=ASM
-#        C:/Users/fcorso/Desktop/INTERRUPT_E_SERIAL/8086/main.asm
+#  D:/Dados Didho/Faculdade/Ciências da Computação/2016-02/Arquitetura de Computadores II/8086-7seg/INTERRUPT_E_SERIAL/8086/Debug/Debug.exe: TOOL=LD
+#     D:/Dados Didho/Faculdade/Ciências da Computação/2016-02/Arquitetura de Computadores II/8086-7seg/INTERRUPT_E_SERIAL/8086/Debug/main.obj: TOOL=ASM
+#        D:/Dados Didho/Faculdade/Ciências da Computação/2016-02/Arquitetura de Computadores II/8086-7seg/INTERRUPT_E_SERIAL/8086/main.asm
 
 # Build tree:
 all:	Debug
