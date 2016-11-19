@@ -41,6 +41,29 @@ DIG8 = 11111111B ;DEC = 255
 DIG9 = 11101111B ;DEC = 239
 
 
+TIMER_COUNTER0	EQU 00h
+TIMER_COUNTER1	EQU 40h
+TIMER_COUNTER2	EQU 80h
+
+ADR_TIMER_DATA0   EQU  (IO3 + 00h)
+ADR_TIMER_DATA1   EQU  (IO3 + 02h)
+ADR_TIMER_DATA2   EQU  (IO3 + 04h)
+ADR_TIMER_CONTROL EQU  (IO3 + 06h)
+
+TIMER_LATCH	  EQU 00h
+TIMER_LSB	  EQU 10h
+TIMER_MSB	  EQU 20h
+TIMER_LSB_MSB 	  EQU 30h
+
+TIMER_MODE0	EQU 00h
+TIMER_MODE1	EQU 02h
+TIMER_MODE2	EQU 04h
+TIMER_MODE3	EQU 06h
+TIMER_MODE4	EQU 08h
+TIMER_MODE5	EQU 09h
+TIMER_BCD	EQU 01h
+
+
 .8086
 .CODE
    ;assume    CS:code,DS:data
@@ -51,7 +74,73 @@ DIG9 = 11101111B ;DEC = 239
 
    ;RESERVADO PARA VETOR DE INTERRUPCOES
    org 0400h
-	  
+
+MACRO_INICIALIZA_8253_TIMER0 MACRO HIGH,LOW
+   PUSHF
+   PUSH AX
+   PUSH DX
+   
+   MOV AL,36H
+   MOV DX, ADR_TIMER_CONTROL
+   OUT DX,AL
+
+   MOV AL,LOW
+   MOV DX, ADR_TIMER_DATA0
+   OUT DX,AL
+
+   MOV AL,HIGH
+   MOV DX, ADR_TIMER_DATA0
+   OUT DX,AL
+   
+   POP DX
+   POP AX
+   POPF
+ENDM
+
+MACRO_INICIALIZA_8253_TIMER1 MACRO HIGH,LOW
+   PUSHF
+   PUSH AX
+   PUSH DX
+   
+   MOV AL,76H
+   MOV DX, ADR_TIMER_CONTROL
+   OUT DX,AL
+
+   MOV AL,LOW
+   MOV DX, ADR_TIMER_DATA1
+   OUT DX,AL
+
+   MOV AL,HIGH
+   MOV DX, ADR_TIMER_DATA1
+   OUT DX,AL
+   
+   POP DX
+   POP AX
+   POPF
+ENDM
+
+MACRO_INICIALIZA_8253_TIMER2 MACRO HIGH,LOW
+   PUSHF
+   PUSH AX
+   PUSH DX
+   
+   MOV AL,0B6H
+   MOV DX, ADR_TIMER_CONTROL
+   OUT DX,AL
+
+   MOV AL,LOW
+   MOV DX, ADR_TIMER_DATA2
+   OUT DX,AL
+
+   MOV AL,HIGH
+   MOV DX, ADR_TIMER_DATA2
+   OUT DX,AL
+   
+   POP DX
+   POP AX
+   POPF
+ENDM
+
 inicio:
      MOV AX,@DATA
      MOV DS,AX
@@ -86,10 +175,7 @@ ZERA:
     jmp seg_uni_show
 
 seg_uni_plus:
-   ; lopop
     JMP seg_uni_plus
-    ;inc seg_uni
-    ;jmp seg_uni_show
 
 zera_seg_uni:
     mov seg_uni,30h
@@ -553,8 +639,31 @@ BUSY:
    OUT DX,AL
    POP DX
    POPF
-   RET 
-    
+   RET
+     
+BEEP:
+   MOV TESTE, 1
+
+COMPARAR_MINUTO:
+     MOV AH,min_uni 
+     CMP AH,MIN_UNI_ALARM
+     JE BEEP 
+ 
+COMPARAR_MINUTOS:     
+     MOV AH,min_dez
+     CMP AH,MIN_DEZ_ALARM
+     JE COMPARAR_MINUTO
+
+COMPARAR_HORA:
+     MOV AH,hor_uni 
+     CMP AH,HOR_UNI_ALARM
+     JE COMPARAR_MINUTOS
+
+COMPARAR_HORARIO:
+     MOV AH, hor_dez
+     CMP AH,HOR_DEZ_ALARM
+     JE COMPARAR_HORA
+
 .startup
 	MOV AX,0000
 	MOV DS,AX
@@ -593,8 +702,8 @@ INTERRUPT_ONE_SECOND:
 	PUSHF 
 	PUSH AX
 	PUSH DX
-	
-	 cmp hor_dez,32h
+	CALL COMPARAR_HORARIO
+    cmp hor_dez,32h
     jne continua
     cmp hor_uni,34h
     je zera_hor_dez
@@ -618,12 +727,7 @@ INTERRUPT_ONE_SECOND:
 	push cx
 	push di
 	push es ;;faz o push de todos os registos que utiliza
-
-	;Activar o SOM BEEEEEEEPPPPPP
-	in al, 061H
-	and al,11111110b 
-	out 061H,al
-
+	
 	POP DX
 	POP AX
 	POPF
@@ -631,6 +735,16 @@ INTERRUPT_ONE_SECOND:
 
 ;MEUS DADOS
 .DATA
+    ; Variaveis usadas para armazenar o horario(HH:MM) informados para despertar o relógio
+    MIN_UNI_ALARM DB 30h
+    MIN_DEZ_ALARM DB 30h
+    HOR_UNI_ALARM DB 30h
+    HOR_DEZ_ALARM DB 30h
+    
+    TESTE DB 0
+    NOTA DB 0
+    TEMPO_NOTA DB 0
+    
     seg_uni db 30h
     seg_dez db 30h
     min_uni db 30h
